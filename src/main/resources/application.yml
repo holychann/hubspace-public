@@ -1,0 +1,97 @@
+spring:
+  application:
+    name: backend
+  datasource:
+    url: ${DATABASE_URL}
+    hikari:
+      maximum-pool-size: 12
+  jpa:
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    publisher-confirm-type: correlated  # for 디버깅
+    publisher-returns: true  # for 디버깅
+    requested-heartbeat: 30  # for 디버깅
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-name: google
+            client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+            client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+            redirect-uri: ${GOOGLE_REDIRECT_URI}
+            authorization-grant-type: authorization_code
+            scope:
+              - profile
+              - email
+              - https://www.googleapis.com/auth/drive.file
+              - https://www.googleapis.com/auth/script.projects
+              - https://www.googleapis.com/auth/forms.body
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth?access_type=offline&prompt=consent
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 25MB
+      resolve-lazily: true
+  data:
+    redis:
+      url: ${REDIS_URL}
+      ttl: 3600
+# ?access_type=offline&prompt=consent 부분 확인
+# access_type=offline 는 구글 Refresh Token 을 사용하겠다는 의미. 최초 1회만 발급
+# prompt=consent 는 계속 물어보고 발급(개발용)
+
+server:
+  port: 8080
+
+
+aws:
+  region: ${AWS_REGION}
+  dynamodb:
+    table-name: ${AWS_TABLE_NAME}
+  credentials:
+    access-key: ${AWS_ACCESS_KEY}
+    secret-key: ${AWS_SECRET_KEY}
+
+rabbitmq:
+  queue:
+    name: event.queue
+  exchange:
+    name: event.exchange
+  routing:
+    key : event.key
+
+jwt:
+  secret: ${JWT_SECRET}
+
+google:
+  application-name: ${GOOGLE_APPLICATION_NAME}
+
+client:
+  url: ${CLIENT_URL}
+
+management:
+  metrics:
+    tags:
+      application: hubspace
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health  # 헬스체크 기능만 노출
+  endpoint:
+    health:
+      show-details: never
+
+  server:
+    port: 9000
+    address: 0.0.0.0
